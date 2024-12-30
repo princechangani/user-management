@@ -9,8 +9,9 @@ public class AttendanceDto {
     private String name;
     private LocalDate date;
     private Long enrollmentNo;
-    private float attendancePercent;
-
+    private Double attendancePercent;
+    private Integer absent;
+    private Integer present;
     public Integer getId() {
         return id;
     }
@@ -43,11 +44,27 @@ public class AttendanceDto {
         this.enrollmentNo = enrollmentNo;
     }
 
-    public float getAttendancePercent() {
+    public Double getAttendancePercent() {
         return attendancePercent;
     }
 
-    public void setAttendancePercent(float attendancePercent) {
+    public void setAttendancePercent(Double attendancePercent) {
         this.attendancePercent = attendancePercent;
+    }
+
+    public Integer getAbsent() {
+        return absent;
+    }
+
+    public void setAbsent(Integer absent) {
+        this.absent = absent;
+    }
+
+    public Integer getPresent() {
+        return present;
+    }
+
+    public void setPresent(Integer present) {
+        this.present = present;
     }
 }

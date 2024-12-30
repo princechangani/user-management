@@ -1,9 +1,11 @@
 package com.campus_connect.user_management.controller;
 
 
+import com.campus_connect.user_management.ClientService.StudentClientService;
 import com.campus_connect.user_management.DTO.AdminDto;
 import com.campus_connect.user_management.DTO.FacultyDto;
 import com.campus_connect.user_management.DTO.StudentDto;
+import com.campus_connect.user_management.responce.FeesDto;
 import com.campus_connect.user_management.service.AdminService;
 import com.campus_connect.user_management.service.FacultyService;
 import com.campus_connect.user_management.service.StudentService;
@@ -20,10 +22,12 @@ public class AdminController {
     private final StudentService studentService;
     private  final FacultyService facultyService;
     private final AdminService adminService;
-    public AdminController(StudentService studentService, FacultyService facultyService, AdminService adminService) {
+    private final StudentClientService studentClientService;
+    public AdminController(StudentService studentService, FacultyService facultyService, AdminService adminService, StudentClientService studentClientService) {
         this.studentService = studentService;
         this.facultyService = facultyService;
         this.adminService = adminService;
+        this.studentClientService = studentClientService;
     }
 
     @PostMapping("/all/admins")
@@ -75,6 +79,13 @@ public class AdminController {
     @ResponseStatus(HttpStatus.OK)
     public List<AdminDto> getAllAdmins() {
         return adminService.getAllAdmins();
+    }
+
+
+    @PostMapping("/save/fees")
+    @ResponseStatus(HttpStatus.OK)
+    public FeesDto getStudentFee(@RequestBody FeesDto feesDto) {
+        return studentClientService.saveStudentFees(feesDto);
     }
 
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Student", uniqueConstraints = {@UniqueConstraint(columnNames = { "email"})})
+
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,19 @@ public class Student {
     private String gradEndYear;
 
     private Long enrollmentNumber;
+    private Long lastOTP;
 
+    @Lob
+    private  byte[] imageData;
+
+
+    public Long getLastOTP() {
+        return lastOTP;
+    }
+
+    public void setLastOTP(Long lastOTP) {
+        this.lastOTP = lastOTP;
+    }
 
 
     public String getEmail() {
@@ -110,5 +123,13 @@ public class Student {
 
     public Long getId() {
         return id;
+    }
+
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
     }
 }

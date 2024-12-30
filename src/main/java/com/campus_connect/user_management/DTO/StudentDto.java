@@ -1,6 +1,8 @@
 package com.campus_connect.user_management.DTO;
 
 
+import jakarta.persistence.Lob;
+
 public class StudentDto {
 
     private Long id;
@@ -13,12 +15,20 @@ public class StudentDto {
     private String division;
     private String gradStartYear;
     private String gradEndYear;
+    private Long lastOTP;
 
     private Long enrollmentNumber;
+    @Lob
+    private  byte[] imageData;
 
 
+    public Long getLastOTP() {
+        return lastOTP;
+    }
 
-
+    public void setLastOTP(Long lastOTP) {
+        this.lastOTP = lastOTP;
+    }
 
     public String getEmail() {
         return email;
@@ -107,5 +117,13 @@ public class StudentDto {
 
     public Long getId() {
         return id;
+    }
+
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
     }
 }

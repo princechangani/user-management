@@ -2,19 +2,12 @@ package com.campus_connect.user_management.ClientService;
 
 import com.campus_connect.user_management.DataEntity.Student;
 import com.campus_connect.user_management.Repository.StudentRepository;
-import com.campus_connect.user_management.StudentClientRepository.AttendanceClient;
-import com.campus_connect.user_management.StudentClientRepository.ResultClient;
-import com.campus_connect.user_management.StudentClientRepository.StudentClient;
+import com.campus_connect.user_management.StudentClientRepository.*;
 import com.campus_connect.user_management.exception.UserNotFoundException;
-import com.campus_connect.user_management.responce.AttendanceDto;
-import com.campus_connect.user_management.responce.ResultDto;
-import com.campus_connect.user_management.responce.StudentResponse;
-import com.campus_connect.user_management.service.JWTService;
-import org.modelmapper.ModelMapper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.campus_connect.user_management.responce.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -24,13 +17,17 @@ public class StudentClientService {
 
 
 private final AttendanceClient attendanceClient;
+private final FeesClient feesClient;
     private final ResultClient resultClient;
     private final StudentRepository studentRepository;
+    private final ScheduleClient scheduleClient;
 
-    public StudentClientService(AttendanceClient attendanceClient, ResultClient resultClient, StudentRepository studentRepository) {
+    public StudentClientService(AttendanceClient attendanceClient, FeesClient feesClient, ResultClient resultClient, StudentRepository studentRepository, ScheduleClient scheduleClient) {
         this.attendanceClient = attendanceClient;
+        this.feesClient = feesClient;
         this.resultClient = resultClient;
         this.studentRepository = studentRepository;
+        this.scheduleClient = scheduleClient;
     }
 
     public StudentResponse getStudentResult(Long enrollmentNo) {
@@ -63,4 +60,18 @@ private final AttendanceClient attendanceClient;
     public AttendanceDto getStudentsAttendance(Long enrollmentNo) {
         return attendanceClient.getAttendance(enrollmentNo);
     }
+
+    public List<ScheduleDto> getStudentSchedule(Integer semester, String division) {
+        return scheduleClient.getScheduleBySemAndDiv(semester,division);
+
+    }
+
+    public FeesDto saveStudentFees(FeesDto feesDto) {
+        return feesClient.saveFees(feesDto);
+
+    }
+    public List<FeesDto> getStudentFees(Long enrollmentNo) {
+        return feesClient.getStudentFees(enrollmentNo);
+    }
+
 }

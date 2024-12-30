@@ -8,19 +8,21 @@ import com.campus_connect.user_management.OTP.EmailService;
 import com.campus_connect.user_management.OTP.OTPService;
 import com.campus_connect.user_management.OTP.OTPStorage;
 import com.campus_connect.user_management.OTP.SmsService;
-import com.campus_connect.user_management.responce.AttendanceDto;
-import com.campus_connect.user_management.responce.ResultDto;
-import com.campus_connect.user_management.responce.StudentResponse;
+import com.campus_connect.user_management.exception.UnauthorizedAccessException;
+import com.campus_connect.user_management.responce.*;
 import com.campus_connect.user_management.service.AdminService;
 import com.campus_connect.user_management.service.FacultyService;
 import com.campus_connect.user_management.service.StudentService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/campus-connect/student")
@@ -29,10 +31,10 @@ public class StudentController {
     private final OTPService otpService;
     private final SmsService smsService;
     private final EmailService emailService;
-
     private final StudentService studentService;
     private  final FacultyService facultyService;
     private final AdminService adminService;
+
     public StudentController(StudentClientService studentClientService, OTPService otpService, SmsService smsService, EmailService emailService, StudentService studentService, FacultyService facultyService, AdminService adminService) {
         this.studentClientService = studentClientService;
         this.otpService = otpService;
@@ -46,31 +48,28 @@ public class StudentController {
 
 
 
-    @PostMapping("/send-otp/{contact}")
-    public ResponseEntity<String> sendOTP(@PathVariable String contact) {
-        String otp = otpService.generateOTP();
-        try {
-            if (contact.contains("@")) {
-                emailService.sendOTP(contact, otp);
-            } else {
-                smsService.sendOTP(contact, otp);
-            }
-            OTPStorage.storeOTP(contact, otp);
-            return ResponseEntity.ok("OTP sent successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending OTP");
-        }
+    @PostMapping("/send-otp")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> sendOTP(@RequestBody StudentDto studentDto) {
+        studentService.sendOTP(studentDto);
+        return new ResponseEntity<>("OTP sent", HttpStatus.OK);
     }
 
     @PostMapping("/login/{otp}")
     public ResponseEntity< Map<String, Object>> verifyStudent(@RequestBody StudentDto studentDto,@PathVariable String otp) {
+        Map<String, Object> loginResponse = new HashMap<>();
 
 
         if (OTPStorage.validateOTP(studentDto.getEmail(),otp)) {
-            StudentDto verifiedStudent = studentService.verify(studentDto);
-            Map<String, Object> loginResponse = new HashMap<>();
-            loginResponse.put("status", "success");
-            loginResponse.put("bearerToken",verifiedStudent.getBearerToken());
+         try   {
+                StudentDto verifiedStudent = studentService.verify(studentDto);
+                loginResponse.put("status", "success");
+                loginResponse.put("bearerToken", verifiedStudent.getBearerToken());
+            }
+         catch (Exception e) {
+             throw new UnauthorizedAccessException(e.getMessage());
+         }
+
             return new ResponseEntity<>(loginResponse, HttpStatus.ACCEPTED);
 
         }
@@ -106,18 +105,44 @@ public class StudentController {
         return studentClientService.saveStudentResult(enrollmentNo,studentResponse);
     }
 
-    @PostMapping("save/attendance")
+    @PostMapping("save/attendance/{enrollmentNo}")
     @ResponseStatus(HttpStatus.CREATED)
-    public AttendanceDto saveStudentAttendance(@RequestParam("enrollmentNo") Long enrollmentNo, @RequestBody AttendanceDto attendanceDto){
+    public AttendanceDto saveStudentAttendance(@PathVariable Long enrollmentNo, @RequestBody AttendanceDto attendanceDto){
         return studentClientService.saveStudentAttendance(enrollmentNo,attendanceDto);
 
     }
-    @GetMapping("get/{enrollmentNo}")
+    @GetMapping("get/attendance/{enrollmentNo}")
     @ResponseStatus(HttpStatus.OK)
     public AttendanceDto getStudentAttendance(@PathVariable Long enrollmentNo){
         return studentClientService.getStudentsAttendance(enrollmentNo);
 
     }
 
+    @PutMapping("update/{enrollmentNo}")
+    @ResponseStatus(HttpStatus.OK)
+    public StudentDto updateStudent(@PathVariable Long enrollmentNo, @RequestBody StudentDto studentDto) {
+        return studentService.updateStudent(studentDto, enrollmentNo);
+    }
+
+    @GetMapping("{email}/{enrollmentNo}")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> getStudentEmail(@PathVariable String email,@PathVariable Long enrollmentNo){
+        Map<String, Object> response = new HashMap<>();
+        response.put("student", studentService.getStudentByEmail(email.trim()));
+        response.put("attendance", studentClientService.getStudentsAttendance(enrollmentNo));
+        return response;
+    }
+
+    @GetMapping("get/schedule/{semester}-{division}")
+    public List<ScheduleDto> getStudentSchedule(@PathVariable Integer semester,@PathVariable String division){
+        return studentClientService.getStudentSchedule(semester,division);
+    }
+
+    @GetMapping("get/fees/{enrollmentNO}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<FeesDto> getStudentFee(@PathVariable Long enrollmentNO){
+        return studentClientService.getStudentFees(enrollmentNO);
+    }
 
 }
+

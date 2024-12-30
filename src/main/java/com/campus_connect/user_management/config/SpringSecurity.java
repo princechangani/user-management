@@ -44,7 +44,9 @@ public class SpringSecurity {
                         .requestMatchers("/campus-connect/admin/login").permitAll()
                         .requestMatchers("/campus-connect/faculty/login").permitAll()
                         .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
-                        .requestMatchers("/campus-connect/student/send-otp/{contact}").permitAll()
+                        .requestMatchers("/campus-connect/student/send-otp").permitAll()
+                        .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
+
 
                         //  .requestMatchers("/campus-connect/admin/register-admin").permitAll()
                       .requestMatchers("/campus-connect/admin").hasRole("ADMIN")

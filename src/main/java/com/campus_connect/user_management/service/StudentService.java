@@ -2,6 +2,10 @@ package com.campus_connect.user_management.service;
 
 import com.campus_connect.user_management.DTO.StudentDto;
 import com.campus_connect.user_management.DataEntity.Student;
+import com.campus_connect.user_management.OTP.EmailService;
+import com.campus_connect.user_management.OTP.OTPService;
+import com.campus_connect.user_management.OTP.OTPStorage;
+import com.campus_connect.user_management.OTP.SmsService;
 import com.campus_connect.user_management.Repository.StudentRepository;
 
 import com.campus_connect.user_management.StudentClientRepository.ResultClient;
@@ -9,13 +13,9 @@ import com.campus_connect.user_management.StudentClientRepository.StudentClient;
 import com.campus_connect.user_management.exception.InvalidCredentialsException;
 import com.campus_connect.user_management.exception.UnauthorizedAccessException;
 import com.campus_connect.user_management.exception.UserNotFoundException;
-import com.campus_connect.user_management.responce.ResultDto;
-import com.campus_connect.user_management.responce.StudentResponse;
-import jakarta.transaction.Transactional;
+
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,8 +35,11 @@ public class StudentService {
     private final JWTService jwtService;
     private final AuthenticationManager authManager;
     private final StudentClient studentClient;
+    private final OTPService otpService;
+    private final SmsService smsService;
+    private final EmailService emailService;
 
-    public StudentService(ResultClient resultClient, StudentRepository studentRepository, ModelMapper modelMapper, BCryptPasswordEncoder encoder, JWTService jwtService, AuthenticationManager authManager, StudentClient studentClient) {
+    public StudentService(ResultClient resultClient, StudentRepository studentRepository, ModelMapper modelMapper, BCryptPasswordEncoder encoder, JWTService jwtService, AuthenticationManager authManager, StudentClient studentClient, OTPService otpService, SmsService smsService, EmailService emailService) {
         this.resultClient = resultClient;
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
@@ -44,6 +47,9 @@ public class StudentService {
         this.jwtService = jwtService;
         this.authManager = authManager;
         this.studentClient = studentClient;
+        this.otpService = otpService;
+        this.smsService = smsService;
+        this.emailService = emailService;
     }
 
     public StudentDto saveStudent(StudentDto studentDto,String token) {
@@ -71,6 +77,31 @@ public class StudentService {
         return mapToStudentDtoList(studentRepository.findAll());
     }
 
+    public StudentDto getStudentByEmail(String email) {
+
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + email));
+
+        return  mapToStudentDto(student);
+    }
+
+    public StudentDto updateStudent(StudentDto studentDto, Long enrollmentNo) {
+        Student student = studentRepository.findByEnrollmentNumber(enrollmentNo)
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Enrollment Number: " + enrollmentNo));
+
+        student.setEmail(studentDto.getEmail());
+        student.setPassword(encoder.encode(studentDto.getPassword()));
+        student.setCourse(studentDto.getCourse());
+        student.setSemester(studentDto.getSemester());
+        student.setDivision(studentDto.getDivision());
+        student.setGradStartYear(studentDto.getGradStartYear());
+        student.setGradEndYear(studentDto.getGradEndYear());
+        student.setEnrollmentNumber(studentDto.getEnrollmentNumber());
+
+        Student updatedStudent = studentRepository.save(student);
+
+        return modelMapper.map(updatedStudent, StudentDto.class);
+    }
     public StudentDto verify(StudentDto studentDto) {
         Student student = studentRepository.findByEmail(studentDto.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + studentDto.getEmail()));
@@ -93,10 +124,40 @@ public class StudentService {
 
         throw new RuntimeException("Unexpected error during authentication");
     }
-    public StudentDto getStudentByEmail(String email) {
-        Student student = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + email));
-        return mapToStudentDto(student);
+    public StudentDto sendOTP(StudentDto studentDto) {
+        Student student = studentRepository.findByEmail(studentDto.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + studentDto.getEmail()));
+
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(studentDto.getEmail(), studentDto.getPassword())
+            );
+
+            if (authentication.isAuthenticated()) {
+              //  String otp = otpService.generateOTP();
+                String otp = "123456";
+
+                try {
+                 /*   if (studentDto.getEmail().trim().toLowerCase().contains("@")) {
+                        emailService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);
+                    } else {
+                        smsService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);
+                    }*/
+                    OTPStorage.storeOTP(studentDto.getEmail().trim().toLowerCase(), otp);
+
+                } catch (Exception e) {
+                    throw new InvalidCredentialsException("Invalid email or password");
+                }
+                StudentDto studentResponseDto = mapToStudentDto(student);
+                studentResponseDto.setLastOTP(Long.valueOf(otp));
+                return studentResponseDto;
+            }
+        } catch (AuthenticationException e) {
+            System.err.println("Authentication failed: " + e.getMessage());
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        throw new RuntimeException("Unexpected error during authentication");
     }
 
 
