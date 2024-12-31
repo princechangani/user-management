@@ -14,6 +14,7 @@ import com.campus_connect.user_management.service.AdminService;
 import com.campus_connect.user_management.service.FacultyService;
 import com.campus_connect.user_management.service.StudentService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

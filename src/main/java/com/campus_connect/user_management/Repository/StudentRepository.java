@@ -6,7 +6,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.Optional;
 
-@RepositoryRestResource
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByEmail(String email);

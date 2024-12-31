@@ -19,11 +19,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SpringSecurity {
 
-
+    private final String[] freeResourceUrls = {"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+            "/swagger-resources/**", "/api-docs/**", "/aggregate/*I"};
     private final UserDetailServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -46,6 +49,9 @@ public class SpringSecurity {
                         .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
                         .requestMatchers("/campus-connect/student/send-otp").permitAll()
                         .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
+                        .requestMatchers(freeResourceUrls).permitAll()
+
+
 
 
                         //  .requestMatchers("/campus-connect/admin/register-admin").permitAll()
