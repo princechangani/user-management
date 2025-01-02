@@ -18,8 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +126,11 @@ public class StudentController {
     public StudentDto updateStudent(@PathVariable Long enrollmentNo, @RequestBody StudentDto studentDto) {
         return studentService.updateStudent(studentDto, enrollmentNo);
     }
-
+    @PutMapping("set/image/{enrollmentNo}/{imageUrl}")
+    @ResponseStatus(HttpStatus.OK)
+    public String setImage(@PathVariable Long enrollmentNo, @PathVariable String imageUrl) {
+        return studentService.setImageUrl(enrollmentNo, imageUrl);
+    }
     @GetMapping("{email}/{enrollmentNo}")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, Object> getStudentEmail(@PathVariable String email,@PathVariable Long enrollmentNo){
@@ -135,7 +141,7 @@ public class StudentController {
     }
 
     @GetMapping("get/schedule/{semester}-{division}")
-    public List<ScheduleDto> getStudentSchedule(@PathVariable Integer semester,@PathVariable String division){
+    public Map<Integer,Map<String,List<ScheduleDto>>> getStudentSchedule(@PathVariable Integer semester,@PathVariable String division){
         return studentClientService.getStudentSchedule(semester,division);
     }
 

@@ -21,9 +21,7 @@ public class Student {
 
     private Long enrollmentNumber;
     private Long lastOTP;
-
-    @Lob
-    private  byte[] imageData;
+private String imageUrl;
 
 
     public Long getLastOTP() {
@@ -117,6 +115,7 @@ public class Student {
         this.course = course;
     }
 
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -125,11 +124,15 @@ public class Student {
         return id;
     }
 
-    public byte[] getImageData() {
-        return imageData;
+
+
+
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

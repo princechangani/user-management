@@ -6,8 +6,8 @@ import jakarta.persistence.Lob;
 public class StudentDto {
 
     private Long id;
-    private  String email;
-    private  String password;
+    private String email;
+    private String password;
     private String bearerToken;
     private String course;
     private String role;
@@ -18,8 +18,7 @@ public class StudentDto {
     private Long lastOTP;
 
     private Long enrollmentNumber;
-    @Lob
-    private  byte[] imageData;
+    private String imageUrl;
 
 
     public Long getLastOTP() {
@@ -118,12 +117,13 @@ public class StudentDto {
     public Long getId() {
         return id;
     }
-
-    public byte[] getImageData() {
-        return imageData;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
+
+

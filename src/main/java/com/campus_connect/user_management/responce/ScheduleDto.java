@@ -11,6 +11,7 @@ public class ScheduleDto {
     private String  division;
     private String dayOfWeek;
     private String startTime;
+private String endTime;
     @Column(length = 500)
     private String location;
 
@@ -62,6 +63,13 @@ public class ScheduleDto {
         this.startTime = startTime;
     }
 
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 
     public String getLocation() {
         return location;

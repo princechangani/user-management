@@ -8,8 +8,6 @@ import com.campus_connect.user_management.OTP.OTPStorage;
 import com.campus_connect.user_management.OTP.SmsService;
 import com.campus_connect.user_management.Repository.StudentRepository;
 
-import com.campus_connect.user_management.StudentClientRepository.ResultClient;
-import com.campus_connect.user_management.StudentClientRepository.StudentClient;
 import com.campus_connect.user_management.exception.InvalidCredentialsException;
 import com.campus_connect.user_management.exception.UnauthorizedAccessException;
 import com.campus_connect.user_management.exception.UserNotFoundException;
@@ -22,31 +20,32 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class StudentService {
-    private final ResultClient resultClient;
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder encoder;
     private final JWTService jwtService;
     private final AuthenticationManager authManager;
-    private final StudentClient studentClient;
+
     private final OTPService otpService;
     private final SmsService smsService;
     private final EmailService emailService;
 
-    public StudentService(ResultClient resultClient, StudentRepository studentRepository, ModelMapper modelMapper, BCryptPasswordEncoder encoder, JWTService jwtService, AuthenticationManager authManager, StudentClient studentClient, OTPService otpService, SmsService smsService, EmailService emailService) {
-        this.resultClient = resultClient;
+    public StudentService( StudentRepository studentRepository, ModelMapper modelMapper, BCryptPasswordEncoder encoder, JWTService jwtService, AuthenticationManager authManager, OTPService otpService, SmsService smsService, EmailService emailService) {
+
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.encoder = encoder;
         this.jwtService = jwtService;
         this.authManager = authManager;
-        this.studentClient = studentClient;
+
         this.otpService = otpService;
         this.smsService = smsService;
         this.emailService = emailService;
@@ -97,11 +96,25 @@ public class StudentService {
         student.setGradStartYear(studentDto.getGradStartYear());
         student.setGradEndYear(studentDto.getGradEndYear());
         student.setEnrollmentNumber(studentDto.getEnrollmentNumber());
+        student.setImageUrl(studentDto.getImageUrl());
 
         Student updatedStudent = studentRepository.save(student);
 
         return modelMapper.map(updatedStudent, StudentDto.class);
     }
+
+    public String setImageUrl(Long enrollmentNo,String imageUrl) {
+        Student student = studentRepository.findByEnrollmentNumber(enrollmentNo)
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Enrollment Number: " + enrollmentNo));
+
+
+        student.setImageUrl(imageUrl.trim());
+        studentRepository.save(student);
+
+        return "image is set";
+
+    }
+
     public StudentDto verify(StudentDto studentDto) {
         Student student = studentRepository.findByEmail(studentDto.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + studentDto.getEmail()));
