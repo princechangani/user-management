@@ -46,9 +46,10 @@ public class SpringSecurity {
                         .requestMatchers("/campus-connect/users/students/**").permitAll()
                         .requestMatchers("/campus-connect/admin/login").permitAll()
                         .requestMatchers("/campus-connect/faculty/login").permitAll()
-                        .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
                         .requestMatchers("/campus-connect/student/send-otp").permitAll()
                         .requestMatchers("/campus-connect/student/login/{otp}").permitAll()
+                        .requestMatchers("/campus-connect/admin/send-otp").permitAll()
+                        .requestMatchers("/campus-connect/admin/login/{otp}").permitAll()
                         .requestMatchers(freeResourceUrls).permitAll()
 
 

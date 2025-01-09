@@ -141,7 +141,7 @@ public class StudentController {
     }
 
     @GetMapping("get/schedule/{semester}-{division}")
-    public Map<Integer,Map<String,List<ScheduleDto>>> getStudentSchedule(@PathVariable Integer semester,@PathVariable String division){
+    public List<ScheduleDto> getStudentSchedule(@PathVariable Integer semester,@PathVariable String division){
         return studentClientService.getStudentSchedule(semester,division);
     }
 

@@ -5,6 +5,8 @@ import com.campus_connect.user_management.ClientService.StudentClientService;
 import com.campus_connect.user_management.DTO.AdminDto;
 import com.campus_connect.user_management.DTO.FacultyDto;
 import com.campus_connect.user_management.DTO.StudentDto;
+import com.campus_connect.user_management.OTP.OTPStorage;
+import com.campus_connect.user_management.exception.UnauthorizedAccessException;
 import com.campus_connect.user_management.responce.FeesDto;
 import com.campus_connect.user_management.service.AdminService;
 import com.campus_connect.user_management.service.FacultyService;
@@ -13,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -28,6 +32,41 @@ public class AdminController {
         this.facultyService = facultyService;
         this.adminService = adminService;
         this.studentClientService = studentClientService;
+    }
+
+
+
+    @PostMapping("/send-otp")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> sendOTP(@RequestBody AdminDto adminDto) {
+        adminService.sendOTP(adminDto);
+        return new ResponseEntity<>("OTP sent", HttpStatus.OK);
+    }
+    @PostMapping("/login/{otp}")
+    public ResponseEntity<Map<String, Object>> verifyAdmin(@RequestBody AdminDto adminDto, @PathVariable String otp) {
+        Map<String, Object> loginResponse = new HashMap<>();
+        if (OTPStorage.validateOTP(adminDto.getEmail(),otp)) {
+            try   {
+                AdminDto verifiedAdmin = adminService.verify(adminDto);
+                loginResponse.put("status", "success");
+                loginResponse.put("bearerToken", verifiedAdmin.getBearerToken());
+            }
+            catch (Exception e) {
+                throw new UnauthorizedAccessException(e.getMessage());
+            }
+
+            return new ResponseEntity<>(loginResponse, HttpStatus.ACCEPTED);
+
+        }
+
+
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    public Object getAdmin(@PathVariable String email) {
+        return adminService.getAdminByEmail(email);
     }
 
     @PostMapping("/all/admins")
@@ -55,14 +94,14 @@ public class AdminController {
         String tokenWithoutBearer = token.replace("Bearer ", "");
         System.out.println("Authorization token "+tokenWithoutBearer);
         studentService.saveStudent(studentDto,tokenWithoutBearer.trim());
-
         return studentDto;
+
     }
-        @PostMapping("/login")
+ /*       @PostMapping("/login")
     public ResponseEntity<AdminDto> verifyUser(@RequestBody AdminDto adminDto) {
         AdminDto verifiedUser = adminService.verify(adminDto);
         return new ResponseEntity<>(verifiedUser, HttpStatus.ACCEPTED);
-    }
+    }*/
 
     @GetMapping("/all/student")
     @ResponseStatus(HttpStatus.OK)

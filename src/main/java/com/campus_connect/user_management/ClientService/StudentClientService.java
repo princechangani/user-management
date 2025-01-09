@@ -59,7 +59,7 @@ public class StudentClientService {
         return studentClient.getAttendance(enrollmentNo);
     }
 
-    public Map<Integer, Map<String,List<ScheduleDto>>> getStudentSchedule(Integer semester, String division) {
+    public List<ScheduleDto> getStudentSchedule(Integer semester, String division) {
         return studentClient.getScheduleBySemAndDiv(semester,division);
 
     }

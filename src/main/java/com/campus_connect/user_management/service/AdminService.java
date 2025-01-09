@@ -1,7 +1,10 @@
 package com.campus_connect.user_management.service;
 
 import com.campus_connect.user_management.DTO.AdminDto;
+import com.campus_connect.user_management.DTO.StudentDto;
 import com.campus_connect.user_management.DataEntity.Admin;
+import com.campus_connect.user_management.DataEntity.Student;
+import com.campus_connect.user_management.OTP.OTPStorage;
 import com.campus_connect.user_management.Repository.AdminRepository;
 import com.campus_connect.user_management.exception.InvalidCredentialsException;
 import com.campus_connect.user_management.exception.UnauthorizedAccessException;
@@ -82,12 +85,20 @@ public List<AdminDto> getAllAdmins() {
         return modelMapper.map(savedAdmin, AdminDto.class);
     }
 
+    public AdminDto getAdminByEmail(String email) {
+
+        Admin admin = adminRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + email));
+
+        return  mapToAdminDto(admin);
+    }
+
     private static void extracted(AdminDto adminDto) {
         adminDto.setEmail(adminDto.getEmail().trim());
     }
 
 
-    public AdminDto verify(AdminDto user) {
+  /*  public AdminDto verify(AdminDto user) {
         Admin admin = adminRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + user.getEmail()));
 
@@ -108,8 +119,66 @@ public List<AdminDto> getAllAdmins() {
         }
 
         throw new RuntimeException("Unexpected error during authentication");
-    }
+    }*/
 
+
+    public AdminDto verify(AdminDto adminDto) {
+        Admin admin = adminRepository.findByEmail(adminDto.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + adminDto.getEmail()));
+
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(adminDto.getEmail(), adminDto.getPassword())
+            );
+
+            if (authentication.isAuthenticated()) {
+                String token = jwtService.generateToken(adminDto);
+                AdminDto adminResponseDto = mapToAdminDto(admin);
+                adminResponseDto.setBearerToken(token);
+                return adminResponseDto;
+            }
+        } catch (AuthenticationException e) {
+            System.err.println("Authentication failed: " + e.getMessage());
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        throw new RuntimeException("Unexpected error during authentication");
+    }
+    public AdminDto sendOTP(AdminDto adminDto) {
+        Admin admin = adminRepository.findByEmail(adminDto.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + adminDto.getEmail()));
+
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(adminDto.getEmail(), adminDto.getPassword())
+            );
+
+            if (authentication.isAuthenticated()) {
+                //  String otp = otpService.generateOTP();
+                String otp = "123456";
+
+                try {
+                 /*   if (studentDto.getEmail().trim().toLowerCase().contains("@")) {
+                        emailService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);
+                    } else {
+                        smsService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);
+                    }*/
+                    OTPStorage.storeOTP(adminDto.getEmail().trim().toLowerCase(), otp);
+
+                } catch (Exception e) {
+                    throw new InvalidCredentialsException("Invalid email or password");
+                }
+                AdminDto adminResponseDto = mapToAdminDto(admin);
+                adminResponseDto.setLastOTP(Long.valueOf(otp));
+                return adminResponseDto;
+            }
+        } catch (AuthenticationException e) {
+            System.err.println("Authentication failed: " + e.getMessage());
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        throw new RuntimeException("Unexpected error during authentication");
+    }
 
     private AdminDto mapToAdminDto(Admin userEntity) {
         AdminDto userDto = modelMapper.map(userEntity, AdminDto.class);

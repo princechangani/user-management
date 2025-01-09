@@ -147,11 +147,11 @@ public class StudentService {
             );
 
             if (authentication.isAuthenticated()) {
-              //  String otp = otpService.generateOTP();
-                String otp = "123456";
+                String otp = otpService.generateOTP();
+             //   String otp = "123456";
 
                 try {
-                 /*   if (studentDto.getEmail().trim().toLowerCase().contains("@")) {
+                  /* if (studentDto.getEmail().trim().toLowerCase().contains("@")) {
                         emailService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);
                     } else {
                         smsService.sendOTP(studentDto.getEmail().trim().toLowerCase(), otp);

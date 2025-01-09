@@ -3,6 +3,10 @@ package com.campus_connect.user_management.DataEntity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 
 @Table(name = "Admin", uniqueConstraints = {@UniqueConstraint(columnNames = { "email"})})
 @Entity
@@ -14,6 +18,25 @@ public class Admin {
     private  String email;
     private  String password;
     private String bearerToken;
+   /* @ElementCollection
+    @CollectionTable(name = "Admin_Authorities", joinColumns = @JoinColumn(name = "admin_id"))
+    @MapKeyColumn(name = "key")
+    @Column(name = "value")
+    private Map<String, Object> authorities;*/
+
+
+
+
+    private Long lastOTP;
+
+
+    public Long getLastOTP() {
+        return lastOTP;
+    }
+
+    public void setLastOTP(Long lastOTP) {
+        this.lastOTP = lastOTP;
+    }
 
 
     public int getId() {
@@ -55,5 +78,15 @@ public class Admin {
     public void setBearerToken(String bearerToken) {
         this.bearerToken = bearerToken;
     }
+
+/*
+    public Map<String, Object> getAuthorities() {
+
+        return authorities;
+    }
+
+    public void setAuthorities(Map<String, Object> authorities) {
+        this.authorities = authorities;
+    }*/
 }
 

@@ -18,7 +18,7 @@ public interface StudentClient {
 
 
     @GetMapping("/schedule/get-by-sem-div")
-    Map<Integer, Map<String,List<ScheduleDto>>> getScheduleBySemAndDiv(@RequestParam Integer semester, @RequestParam String division);
+    List<ScheduleDto> getScheduleBySemAndDiv(@RequestParam Integer semester, @RequestParam String division);
 
 
 

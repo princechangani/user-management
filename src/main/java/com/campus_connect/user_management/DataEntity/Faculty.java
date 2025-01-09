@@ -22,6 +22,17 @@ public class Faculty{
     private List<String> subjects;
     private LocalDateTime joinedAt;
 
+    private Long lastOTP;
+
+
+
+    public Long getLastOTP() {
+        return lastOTP;
+    }
+
+    public void setLastOTP(Long lastOTP) {
+        this.lastOTP = lastOTP;
+    }
 
     public String getRole() {
         return role;
